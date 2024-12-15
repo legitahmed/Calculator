@@ -19,91 +19,35 @@ function handleInput(number) {
     updateDisplay();
 }
 
-document.getElementById("1").addEventListener("click", () => handleInput("1"));
-document.getElementById("2").addEventListener("click", () => handleInput("2"));
-document.getElementById("3").addEventListener("click", () => handleInput("3"));
-document.getElementById("4").addEventListener("click", () => handleInput("4"));
-document.getElementById("5").addEventListener("click", () => handleInput("5"));
-document.getElementById("6").addEventListener("click", () => handleInput("6"));
-document.getElementById("7").addEventListener("click", () => handleInput("7"));
-document.getElementById("8").addEventListener("click", () => handleInput("8"));
-document.getElementById("9").addEventListener("click", () => handleInput("9"));
-document.getElementById("0").addEventListener("click", () => handleInput("0"));
-document.getElementById(".").addEventListener("click", () => handleInput("."));
+["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "."].forEach(id => {
+    document.getElementById(id).addEventListener("click", () => handleInput(id));
+});
 
 let operatorPressed = false
 let currentOperator = null
 const operators = document.querySelectorAll('.operator');
 operators.forEach(button => {
     button.addEventListener('click', e => {
-        if (variable1 !== '' && variable2 === '') {
-            operatorPressed = true;
-            currentOperator = e.target.innerText;  // Get the clicked operator
-            screen_text += currentOperator; // Update screen display
-            updateDisplay();
+        const operator = e.target.innerText; // Get the clicked operator
+
+        // If both variables are set, calculate the result before moving to the next operator
+        if (variable1 !== '' && variable2 !== '') {
+            operate(currentOperator); // Perform the previous operation
         }
+
+        // Update the current operator and set operatorPressed
+        currentOperator = operator;
+        operatorPressed = true;
+
+        // Update the screen to show the new operator
+        screen_text = variable1 + currentOperator; // Only variable1 and the new operator
+        updateDisplay();
     });
 });
 
-function handleOperator(operator) {
-    if ( variable1 !== '' && variable2 !== '') {
-        operate(currentOperator); // handle an operation before doing the next one
-    }
-    currentOperator = operator;
-    operatorPressed = true;
-}
-
-document.getElementById("+").addEventListener("click", () => handleOperator("+"));
-document.getElementById("-").addEventListener("click", () => handleOperator("-"));
-document.getElementById("*").addEventListener("click", () => handleOperator("×"));
-document.getElementById("/").addEventListener("click", () => handleOperator("÷"));
-document.getElementById("%").addEventListener("click", () => handleOperator("%"));
-
-function operate(currentOperator) {
-    // Parse the numbers from variable1 and variable2
+function operate(currentOperator, withOperator = true) {
     let num1 = parseFloat(variable1);
     let num2 = parseFloat(variable2);
-    let result = 0;
-    
-    switch (currentOperator) {
-        case "+":
-            result = num1 + num2;
-            break;
-        case "-":
-            result = num1 - num2;
-            break;
-        case "×":
-            result = num1 * num2;
-            break;
-        case "%":
-            result = num1 % num2;
-            break;
-        case "÷":
-            if (num2 === 0) {
-                screen_text = "Error: Division by zero";
-                updateDisplay();
-                return;
-            }
-            result = num1 / num2;
-            break;
-    }
-
-    screen_text = result + currentOperator
-    updateDisplay();
-
-    // Update variable1 to hold the result for future operations
-    variable1 = result.toString();
-    variable2 = '';  // Clear variable2 for the next input
-    operatorPressed = false;  // Reset operatorPressed flag
-}
-
-
-function operateEqual(currentOperator) {
-    // Parse the numbers from variable1 and variable2
-    let num1 = parseFloat(variable1);
-    let num2 = parseFloat(variable2);
-
-
     let result = 0;
 
     switch (currentOperator) {
@@ -129,16 +73,14 @@ function operateEqual(currentOperator) {
             break;
     }
 
-    screen_text = result 
-    updateDisplay();
-
-    // Update variable1 to hold the result for future operations
     variable1 = result.toString();
-    variable2 = '';  // Clear variable2 for the next input
-    operatorPressed = false;  // Reset operatorPressed flag
+    variable2 = ''; 
+    screen_text = withOperator ? variable1 + currentOperator : variable1;
+    updateDisplay();
+    operatorPressed = false;
 }
 
-document.getElementById("equal").addEventListener("click", () => operateEqual(currentOperator));
+document.getElementById("equal").addEventListener("click", () => operate(currentOperator, false));
 
 function AC() {
     variable1 = '';
@@ -153,10 +95,24 @@ function AC() {
 
 document.getElementById("clear").addEventListener("click", AC); 
 
+function backSpace() {
+    let arr = screen_text.split(""); //split the string into an array of charchters 
+    arr.pop(); // Remove the last character
+    screen_text = arr.join(''); // Join the array back into a string and update the global screen_text
+    updateDisplay(); // Refresh the display
 
-/*
-TO DO:
-      update the current operator in the funtion operateEqual dynamically
-      implment a backspace function
-      review the whole project again 
-*/
+    if (operatorPressed) {
+        let arr2 = variable2.split('');
+        arr2.pop();
+        variable2 = arr2.join('')
+    }
+    else {
+        let arr1 = variable1.split('');
+        arr1.pop()
+        variable1 = arr1.join('')
+    }
+}
+
+
+document.getElementById("delete").addEventListener("click", backSpace); 
+
